@@ -1,3 +1,5 @@
+import { createServer } from "http"  
+
 const WebSocket = require('ws');
 const { getSession, updateSession } = require('./sessionStore');
 
@@ -5,6 +7,9 @@ const { getSession, updateSession } = require('./sessionStore');
 const socketMap = {}; // email → socket
 
 const wss = new WebSocket.Server({ port: 8080 });
+const app = express()
+const server = createServer(app)
+
 console.log("✅ WebSocket server started on ws://localhost:8080");
 
 wss.on('connection', (socket) => {
@@ -40,3 +45,17 @@ wss.on('connection', (socket) => {
     // Optional: clean up socketMap here if needed
   });
 });
+
+const PORT = process.env.PORT || 3000
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`)
+  console.log(`WebSocket server ready for connections`)
+})
+
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  console.log("SIGTERM received, shutting down gracefully")
+  server.close(() => {
+    console.log("Server closed")
+  })
+})
